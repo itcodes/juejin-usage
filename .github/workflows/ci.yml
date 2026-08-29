@@ -32,6 +32,9 @@ jobs:
       - name: dashboard 测试
         run: pnpm --filter @juejin-opensource/jusage-dashboard test
 
+      - name: cli 测试
+        run: pnpm --filter @juejin-opensource/jusage test
+
       - name: CLI 构建（含 dashboard 产物）
         run: pnpm build:cli
 
