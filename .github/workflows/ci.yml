@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: 构建与测试
+    # core 部分测试硬编码 macOS 目录布局（Library/Application Support），与上游开发平台一致
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 构建 core（dashboard 测试依赖其 dist）
+        run: pnpm --filter @juejin-opensource/jusage-core build
+
+      - name: core 测试
+        run: pnpm --filter @juejin-opensource/jusage-core test
+
+      - name: dashboard 测试
+        run: pnpm --filter @juejin-opensource/jusage-dashboard test
+
+      - name: CLI 构建（含 dashboard 产物）
+        run: pnpm build:cli
+
+  renderer-sync:
+    name: Dashboard / Desktop 副本核对（仅提醒，不阻断）
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 检查单侧改动的同名副本
+        run: node scripts/check-renderer-sync.mjs --base "origin/${{ github.base_ref }}"

@@ -18,6 +18,15 @@
 
 跨端改动用影响最大的一端，PR 正文写清范围（例如 `feat/web/share-card`，注明 Desktop renderer 同步改了）。
 
+## CI
+
+PR 会跑 `.github/workflows/ci.yml`：core / dashboard 测试 + CLI 构建（macOS runner，core 部分测试依赖 macOS 目录布局）。另有「副本核对」任务：只改了 `packages/dashboard/src` 与 `apps/desktop/src/renderer` 同名副本中的一侧时会在 PR 上告警（不阻断合并）。本地可自查：
+
+```bash
+node scripts/check-renderer-sync.mjs               # 全量清单
+node scripts/check-renderer-sync.mjs --base main   # 只看本次改动
+```
+
 Fork [juejin-cn/juejin-usage](https://github.com/juejin-cn/juejin-usage) → 按上面开分支 → 提交 Pull Request。
 
 ## 按端启动
